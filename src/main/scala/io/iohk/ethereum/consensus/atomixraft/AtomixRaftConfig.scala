@@ -14,6 +14,7 @@ import scala.concurrent.duration.{FiniteDuration, _}
 case class AtomixRaftConfig private(
   localNode: AtomixNode,
   bootstrapNodes: List[AtomixNode],
+  allNodes: List[AtomixNode],
   dataDir: File,
   electionTimeout: FiniteDuration,
   heartbeatInterval: FiniteDuration,
@@ -62,10 +63,14 @@ object AtomixRaftConfig extends Logger {
 
     val config = mantisConfig.getConfig(Protocol.Names.AtomixRaft)
     val localNode = parseNode(config.getString(Keys.LocalNode))
+
     // In configuration, we can specify all nodes as bootstrap nodes, for convenience
-    val bootstrapNodes_ = config.getStringList(Keys.BootstrapNodes).asScala.map(parseNode).toList
+    // FIXME Require that we specify ALL nodes. The fact that Raft needs only the
+    // other peers is an implementation detail. After all, having all nodes is more
+    // uniform and easier to handle when configuring the cluster.
+    val allNodes = config.getStringList(Keys.BootstrapNodes).asScala.map(parseNode).toList
     // In reality, the API requires all the _other_ nodes, so we just remove ourselves
-    val bootstrapNodes = bootstrapNodes_.filterNot(_.id() == localNode.id())
+    val bootstrapNodes = allNodes.filterNot(_.id() == localNode.id())
     val dataDir = new File(config.getString(Keys.DataDir))
     val electionTimeout = config.getDuration(Keys.ElectionTimeout).toMillis.millis
     val heartbeatInterval = config.getDuration(Keys.HeartbeatInterval).toMillis.millis
@@ -77,6 +82,7 @@ object AtomixRaftConfig extends Logger {
     new AtomixRaftConfig(
       localNode = localNode,
       bootstrapNodes = bootstrapNodes,
+      allNodes = allNodes,
       dataDir = dataDir,
       electionTimeout = electionTimeout,
       heartbeatInterval = heartbeatInterval,

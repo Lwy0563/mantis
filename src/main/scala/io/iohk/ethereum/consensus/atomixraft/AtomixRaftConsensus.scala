@@ -3,6 +3,7 @@ package atomixraft
 
 import java.time.{Duration ⇒ JDuration}
 
+import com.timgroup.statsd.StatsDClient
 import io.atomix.cluster._
 import io.atomix.cluster.impl.{DefaultClusterMetadataService, DefaultClusterService}
 import io.atomix.cluster.messaging.impl.DefaultClusterMessagingService
@@ -23,6 +24,7 @@ import io.iohk.ethereum.consensus.validators.Validators
 import io.iohk.ethereum.domain.BlockchainImpl
 import io.iohk.ethereum.ledger.BlockPreparator
 import io.iohk.ethereum.ledger.Ledger.VMImpl
+import io.iohk.ethereum.metrics.{Metrics, MetricsClient}
 import io.iohk.ethereum.nodebuilder.Node
 import io.iohk.ethereum.utils.{BlockchainConfig, Logger}
 
@@ -42,6 +44,17 @@ class AtomixRaftConsensus private(
   private[this] final val raftServer = new RaftServerRef
 
   private[this] final val raftConfig: AtomixRaftConfig = config.specific
+
+  // Note We assume a fixed cluster
+  // The idea is that if the list of Raft nodes is the same on all hosts
+  // and it also contains the local Raft host, then we can compute
+  // our index in the list and whenever we are the leader, publish
+  // the index as a metric. This way we know who the leader is from
+  // the metrics dashboard.
+  private[this] final val myIndexOpt: Option[Int] =
+    raftConfig.allNodes.zipWithIndex.find {
+      case (node, index) ⇒ node.id() == raftConfig.localNode.id()
+    }.map(_._2)
 
   private[this] final val _blockPreparator = new BlockPreparator(
     vm = vm,
@@ -63,6 +76,14 @@ class AtomixRaftConsensus private(
   }
 
   private[this] def onLeader(): Unit = {
+    val metricsClient = MetricsClient.get()
+
+    metricsClient.gauge(Metrics.RaftLeaderEvent, 1L)
+
+    for(myIndex ← myIndexOpt) {
+      metricsClient.gauge(Metrics.RaftLeaderIndex, myIndex)
+    }
+
     miner ! IAmTheLeader
   }
 
@@ -90,13 +111,16 @@ class AtomixRaftConsensus private(
 
   private[this] def setupRaftServer(node: Node): Unit = {
     raftServer.setOnce {
-      import raftConfig.{bootstrapNodes, dataDir, localNode}
+      import raftConfig.{bootstrapNodes ⇒ allNodes, dataDir, localNode}
 
       import scala.collection.JavaConverters._
 
       val messagingService = NettyMessagingService.builder.withEndpoint(localNode.endpoint).build
 
+      // The cluster implementation
+      val bootstrapNodes = allNodes.filterNot(_.id() == localNode.id())
       val metadata = ClusterMetadata.builder.withBootstrapNodes(bootstrapNodes.asJava).build
+
       val metadataService = new DefaultClusterMetadataService(metadata, messagingService)
       val clusterService = new DefaultClusterService(localNode, metadataService, messagingService)
       val clusterMessagingService = new DefaultClusterMessagingService(clusterService, messagingService)
