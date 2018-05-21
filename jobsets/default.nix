@@ -64,6 +64,12 @@ let pkgs = import nixpkgs {};
           };
         };
       };
+      "docker-shims" = mkDefinition {
+        description = "IELE Testnet - Docker Shims";
+        nixexprinput = "src";
+        nixexprpath = "jobsets/docker-shims.nix";
+        inputs = {};
+      };
     };
 in {
   jobsets = pkgs.runCommand "spec.json" {} ''
