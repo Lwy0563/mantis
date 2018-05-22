@@ -5,7 +5,7 @@
 
 with import nixpkgs {};
 let foo = import ./release-mantis.nix {
-  inherit sbtVerifySrc mantisSrc;
+  inherit sbtVerifySrc mantisSrc nixpkgs;
 };
 in {
   base = dockerTools.buildImage {
