@@ -13,6 +13,8 @@ in rec {
   };
 
   withJava = pkgs.dockerTools.buildImage {
+    name = "iohk-base";
+    tag = "latest";
     fromImageName = "ubuntu";
     fromImageTag = "16.04";
 
@@ -20,7 +22,7 @@ in rec {
   };
 
   mantis-docker = pkgs.dockerTools.buildImage {
-    name = "iohk-base";
+    name = "mantis";
     tag = "latest";
     fromImage = withJava;
     contents = mantis;
