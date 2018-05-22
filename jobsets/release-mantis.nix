@@ -12,10 +12,6 @@ in rec {
     inherit sbtVerify;
   };
 
-  foo = dockerTools.exportImage {
-    fromImage = docker-mantis;
-    name = docker-mantis.name;
-  };
   docker-mantis = dockerTools.buildImage {
     name = "mantis";
     tag = "latest";
@@ -37,5 +33,10 @@ in rec {
         "8099/tcp" = {}; # Faucet.
       };
     };
+  };
+
+  exported-docker-mantis = dockerTools.exportImage {
+    fromImage = docker-mantis;
+    name = docker-mantis.name;
   };
 }
