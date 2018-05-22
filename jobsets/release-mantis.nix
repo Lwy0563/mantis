@@ -25,7 +25,6 @@ in rec {
       mantis
     ];
     config = {
-      Cmd = [ "/bin/mantis" ];
       ExposedPorts = {
         "9076/tcp" = {}; # Ethereum protocol connections
         "30303/tcp" = {}; # Discovery protocol
