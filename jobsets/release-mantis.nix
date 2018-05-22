@@ -12,19 +12,21 @@ in rec {
     inherit sbtVerify;
   };
 
-  withJava = pkgs.dockerTools.buildImage {
-    name = "iohk-base";
-    tag = "latest";
-    fromImageName = "ubuntu";
-    fromImageTag = "16.04";
-
-    contents = pkgs.openjdk8;
-  };
-
   mantis-docker = pkgs.dockerTools.buildImage {
     name = "mantis";
     tag = "latest";
-    fromImage = withJava;
     contents = mantis;
+    fromImage = pkgs.dockerTools.buildImage {
+      name = "iohk-java";
+      tag = "latest";
+      contents = pkgs.openjdk8;
+      fromImage = {
+        name = "iohk-base";
+        tag = "latest";
+        contents = pkgs.stdenv;
+        fromImageName = "ubuntu";
+        fromImageTag = "16.04";
+      };
+    };
   };
 }
