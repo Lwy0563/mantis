@@ -24,5 +24,12 @@ in rec {
       pkgs.openjdk8
       mantis
     ];
+    config = {
+      Cmd = [ "/bin/mantis" ];
+      WorkingDir = "/";
+      Volumes = {
+        "/conf" = {};
+      };
+    };
   };
 }
