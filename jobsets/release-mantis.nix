@@ -12,6 +12,10 @@ in rec {
     inherit sbtVerify;
   };
 
+  foo = dockerTools.exportImage {
+    fromImage = docker-mantis;
+    name = docker-mantis.name;
+  };
   docker-mantis = dockerTools.buildImage {
     name = "mantis";
     tag = "latest";
