@@ -26,10 +26,6 @@ in rec {
     ];
     config = {
       Cmd = [ "/bin/mantis" ];
-      WorkingDir = "/";
-      Volumes = {
-        "/conf" = {};
-      };
       ExposedPorts = {
         "9076/tcp" = {}; # Ethereum protocol connections
         "30303/tcp" = {}; # Discovery protocol
