@@ -11,7 +11,7 @@ in rec {
     inherit mantisSrc;
     inherit sbtVerify;
   };
-  mantis-docker = dockerTools.buildImage {
+  mantis-docker = pkgs.dockerTools.buildImage {
     name = "iohk-base";
     tag = "latest";
     fromImageName = "ubuntu";
