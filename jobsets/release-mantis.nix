@@ -6,9 +6,17 @@ let pkgs = import nixpkgs {};
     sbtVerify = pkgs.callPackage ./sbt-verify.nix {
       inherit sbtVerifySrc;
     };
-in {
+in rec {
   mantis = pkgs.callPackage ./mantis.nix {
     inherit mantisSrc;
     inherit sbtVerify;
+  };
+  mantis-docker = dockerTools.buildImage {
+    name = "iohk-base";
+    tag = "latest";
+    fromImageName = "ubuntu";
+    fromImageTag = "16.04";
+
+    contents = mantis;
   };
 }
