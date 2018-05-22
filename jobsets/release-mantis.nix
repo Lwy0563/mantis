@@ -11,12 +11,18 @@ in rec {
     inherit mantisSrc;
     inherit sbtVerify;
   };
-  mantis-docker = pkgs.dockerTools.buildImage {
-    name = "iohk-base";
-    tag = "latest";
+
+  withJava = pkgs.dockerTools.buildImage {
     fromImageName = "ubuntu";
     fromImageTag = "16.04";
 
+    contents = openjdk8;
+  };
+
+  mantis-docker = pkgs.dockerTools.buildImage {
+    name = "iohk-base";
+    tag = "latest";
+    fromImage = withJava;
     contents = mantis;
   };
 }
