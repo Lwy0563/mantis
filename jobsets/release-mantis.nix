@@ -18,7 +18,6 @@ in rec {
     fromImageName = "ubuntu";
     fromImageTag = "16.04";
     contents = [
-      pkgs.coreutils
       pkgs.gnused
       pkgs.gawk
       pkgs.openjdk8
