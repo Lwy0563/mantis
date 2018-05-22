@@ -2,25 +2,26 @@
 , sbtVerifySrc
 , mantisSrc
 }:
-let pkgs = import nixpkgs {};
-    sbtVerify = pkgs.callPackage ./sbt-verify.nix {
+with import nixpkgs {};
+let sbtVerify = callPackage ./sbt-verify.nix {
       inherit sbtVerifySrc;
     };
 in rec {
-  mantis = pkgs.callPackage ./mantis.nix {
+  mantis = callPackage ./mantis.nix {
     inherit mantisSrc;
     inherit sbtVerify;
   };
 
-  docker-mantis = pkgs.dockerTools.buildImage {
+  docker-mantis = dockerTools.buildImage {
     name = "mantis";
     tag = "latest";
     fromImageName = "ubuntu";
     fromImageTag = "16.04";
     contents = [
-      pkgs.gnused
-      pkgs.gawk
-      pkgs.openjdk8
+      coreutils
+      gnused
+      gawk
+      openjdk8
       mantis
     ];
     config = {
@@ -28,6 +29,13 @@ in rec {
       WorkingDir = "/";
       Volumes = {
         "/conf" = {};
+      };
+      ExposedPorts = {
+        "9076/tcp" = {}; # Ethereum protocol connections
+        "30303/tcp" = {}; # Discovery protocol
+        "8546/tcp" = {}; # JSON-RPC http endpoint
+        "5679/tcp" = {}; # Raft consensus protocol
+        "8099/tcp" = {}; # Faucet.
       };
     };
   };
