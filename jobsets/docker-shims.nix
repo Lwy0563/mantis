@@ -1,16 +1,19 @@
-{ nixpkgs ? <nixpkgs> }:
+{ nixpkgs ? <nixpkgs>
+, sbtVerifySrc
+, mantisSrc
+}:
 
-let pkgs = import nixpkgs {};
+with import nixpkgs {};
+let foo = import ./release-mantis.nix {
+  inherit sbtVerifySrc mantisSrc;
+}
 in {
-  base = pkgs.dockerTools.buildImage {
+  base = dockerTools.buildImage {
     name = "iohk-base";
     tag = "latest";
     fromImageName = "ubuntu";
     fromImageTag = "16.04";
 
-    runAsRoot = ''
-      #!${pkgs.stdenv.shell}
-      date
-    '';
+    contents = foo.mantis;
   };
 }

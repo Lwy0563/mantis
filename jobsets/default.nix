@@ -68,7 +68,16 @@ let pkgs = import nixpkgs {};
         description = "IELE Testnet - Docker Shims";
         nixexprinput = "src";
         nixexprpath = "jobsets/docker-shims.nix";
-        inputs = {};
+        inputs = {
+          sbtVerifySrc = mkGitSrc {
+            repo = "https://github.com/input-output-hk/sbt-verify.git";
+            branch = "refs/tags/v0.4.1";
+          };
+          mantisSrc = mkGitSrc {
+            repo = "https://github.com/input-output-hk/mantis.git";
+            branch = "refs/heads/phase/iele_testnet";
+          };
+        };
       };
     };
 in {
