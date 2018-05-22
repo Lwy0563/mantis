@@ -16,7 +16,7 @@ in rec {
     fromImageName = "ubuntu";
     fromImageTag = "16.04";
 
-    contents = openjdk8;
+    contents = pkgs.openjdk;
   };
 
   mantis-docker = pkgs.dockerTools.buildImage {
