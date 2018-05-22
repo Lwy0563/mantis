@@ -20,7 +20,7 @@ in rec {
       name = "iohk-java";
       tag = "latest";
       contents = pkgs.openjdk8;
-      fromImage = {
+      fromImage = pkgs.dockerTools.buildImage {
         name = "iohk-base";
         tag = "latest";
         contents = pkgs.stdenv;
